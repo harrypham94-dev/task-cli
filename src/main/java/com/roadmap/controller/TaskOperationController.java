@@ -70,10 +70,8 @@ public class TaskOperationController {
 
     public void updateTask(final String[] arguments) {
         int id = Integer.parseInt(arguments[0]);
-        Task updatedTask = new Task();
-        updatedTask.setId(id);
-        updatedTask.setDescription(arguments[1]);
-        service.updateTask(updatedTask);
+        String description = arguments[1];
+        service.updateTaskDescription(id,description);
     }
 
     public void deleteTask(final String[] arguments) {

@@ -3,20 +3,19 @@ package com.roadmap.entity;
 import com.roadmap.enums.TaskStatus;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class Task {
-    private int id;
+    private Integer id;
     private String description;
     private TaskStatus status;
     private LocalDate createdAt;
     private LocalDate updatedAt;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

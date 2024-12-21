@@ -7,69 +7,62 @@ import com.roadmap.util.JsonFileHandler;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TaskRepositoryImpl implements TaskRepository {
 
-    private final List<Task> tasks;
+    private final Map<Integer, Task> taskByIdMap;
 
     public TaskRepositoryImpl() throws IOException {
-        tasks = JsonFileHandler.readJsonFile();
+        taskByIdMap = JsonFileHandler.readJsonFile().stream().collect(Collectors.toMap(Task::getId, task -> task));
     }
 
     @Override
     public void save(Task task) {
-        final Optional<Integer> optId = tasks.stream().map(Task::getId).sorted(Comparator.reverseOrder()).findFirst();
-        if (optId.isPresent()) {
-            task.setId(optId.get() + 1);
+        if (task.getId() == null) {
+            Optional<Integer> optId = taskByIdMap.keySet().stream().max(Integer::compareTo);
+            if (optId.isPresent()) {
+                task.setId(optId.get() + 1);
+            } else {
+                task.setId(0);
+            }
+            taskByIdMap.put(task.getId(), task);
         } else {
-            task.setId(0);
+            Task foundTask = findById(task.getId());
+            if (foundTask != null) {
+                foundTask.setDescription(task.getDescription());
+                foundTask.setStatus(task.getStatus());
+                foundTask.setUpdatedAt(LocalDate.now());
+                taskByIdMap.put(foundTask.getId(), foundTask);
+            }
         }
-        tasks.add(task);
     }
 
     @Override
     public List<Task> findAll() {
-        return tasks;
+        return taskByIdMap.values().stream().toList();
     }
 
     @Override
     public List<Task> findByStatus(TaskStatus status) {
-        return tasks.stream().filter(task -> task.getStatus().equals(status)).collect(Collectors.toList());
+        return taskByIdMap.values().stream().filter(task -> task.getStatus().equals(status)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Task findById(int id) {
+        return taskByIdMap.get(id);
     }
 
     @Override
     public void delete(int id) {
-        tasks.removeIf(task -> task.getId() == id);
-    }
-
-    @Override
-    public void update(Task task) {
-        tasks.stream()
-                .filter(foundTask -> foundTask.getId() == task.getId())
-                .findFirst()
-                .ifPresent(foundTask -> {
-                    foundTask.setDescription(task.getDescription());
-                    foundTask.setUpdatedAt(LocalDate.now());
-                });
-    }
-
-    @Override
-    public void updateStatus(int id, TaskStatus status) {
-        tasks.stream()
-                .filter(foundTask -> foundTask.getId() == id)
-                .findFirst()
-                .ifPresent(foundTask -> {
-                    foundTask.setStatus(status);
-                    foundTask.setUpdatedAt(LocalDate.now());
-                });
+        taskByIdMap.remove(id);
     }
 
     @Override
     public void persist() throws IOException {
-        JsonFileHandler.writeJsonFile(tasks);
+        JsonFileHandler.writeJsonFile(taskByIdMap.values().stream().toList());
     }
 }

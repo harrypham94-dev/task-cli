@@ -26,8 +26,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void updateTask(Task task) {
-        taskRepository.update(task);
+    public void updateTaskDescription(int id, String description) {
+        final Task foundTask = taskRepository.findById(id);
+        if (foundTask != null) {
+            foundTask.setDescription(description);
+            taskRepository.save(foundTask);
+        } else {
+            throw new RuntimeException("Task not found");
+        }
     }
 
     @Override
@@ -37,7 +43,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void updateTaskStatus(int id, TaskStatus status) {
-        taskRepository.updateStatus(id, status);
+        final Task foundTask = taskRepository.findById(id);
+        if (foundTask != null) {
+            foundTask.setStatus(status);
+            taskRepository.save(foundTask);
+        } else {
+            throw new RuntimeException("Task not found");
+        }
     }
 
     @Override
