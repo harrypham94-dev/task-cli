@@ -95,15 +95,29 @@ public class TaskServiceTest {
     }
 
     @Test
-    public void deleteTask() {
+    public void deleteTask_foundTask() {
         // given
         int id = 1;
+        Task task = new Task();
+        task.setId(id);
+        when(taskRepository.findById(eq(id))).thenReturn(task);
 
         // when
         taskService.deleteTask(id);
 
         // then
         verify(taskRepository).delete(id);
+    }
+
+    @Test
+    public void deleteTask_notFoundTask() {
+        // given
+        int id = 1;
+
+        // when
+
+        // then
+        assertThrows(RuntimeException.class, () -> taskService.deleteTask(id));
     }
 
     @Test

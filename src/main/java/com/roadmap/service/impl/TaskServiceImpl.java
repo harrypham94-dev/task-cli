@@ -38,7 +38,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void deleteTask(int id) {
-        taskRepository.delete(id);
+        final Task foundTask = taskRepository.findById(id);
+        if (foundTask != null) {
+            taskRepository.delete(id);
+        } else {
+            throw new RuntimeException("Task not found");
+        }
+
     }
 
     @Override
